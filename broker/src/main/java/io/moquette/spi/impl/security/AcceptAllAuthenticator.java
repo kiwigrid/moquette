@@ -17,7 +17,9 @@
 package io.moquette.spi.impl.security;
 
 import io.moquette.spi.security.IAuthenticator;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AcceptAllAuthenticator implements IAuthenticator {
 
     public boolean checkValid(String clientId, String username, byte[] password) {

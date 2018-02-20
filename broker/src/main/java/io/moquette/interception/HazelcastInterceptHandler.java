@@ -19,7 +19,7 @@ package io.moquette.interception;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ITopic;
 import io.moquette.interception.messages.InterceptPublishMessage;
-import io.moquette.server.Server;
+import io.moquette.server.IServer;
 import io.netty.buffer.ByteBuf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ public class HazelcastInterceptHandler extends AbstractInterceptHandler {
     private static final Logger LOG = LoggerFactory.getLogger(HazelcastInterceptHandler.class);
     private final HazelcastInstance hz;
 
-    public HazelcastInterceptHandler(Server server) {
+    public HazelcastInterceptHandler(IServer server) {
         this.hz = server.getHazelcastInstance();
     }
 

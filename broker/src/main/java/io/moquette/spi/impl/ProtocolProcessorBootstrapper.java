@@ -19,7 +19,7 @@ package io.moquette.spi.impl;
 import io.moquette.BrokerConstants;
 import io.moquette.interception.InterceptHandler;
 import io.moquette.server.ConnectionDescriptorStore;
-import io.moquette.server.Server;
+import io.moquette.server.IServer;
 import io.moquette.server.config.IConfig;
 import io.moquette.server.config.IResourceLoader;
 import io.moquette.spi.IMessagesStore;
@@ -82,7 +82,7 @@ public class ProtocolProcessorBootstrapper {
      * @return the processor created for the broker.
      */
     public ProtocolProcessor init(IConfig props, List<? extends InterceptHandler> embeddedObservers,
-            IAuthenticator authenticator, IAuthorizator authorizator, Server server) {
+            IAuthenticator authenticator, IAuthorizator authorizator, IServer server) {
         IMessagesStore messagesStore;
         LOG.info("Initializing messages and sessions stores...");
         String storageClassName = props.getProperty(BrokerConstants.STORAGE_CLASS_NAME, INMEMDB_STORE_CLASS);
@@ -113,7 +113,8 @@ public class ProtocolProcessorBootstrapper {
         List<InterceptHandler> observers = new ArrayList<>(embeddedObservers);
         String interceptorClassName = props.getProperty(BrokerConstants.INTERCEPT_HANDLER_PROPERTY_NAME);
         if (interceptorClassName != null && !interceptorClassName.isEmpty()) {
-            InterceptHandler handler = loadClass(interceptorClassName, InterceptHandler.class, Server.class, server);
+            //TODO
+            InterceptHandler handler = loadClass(interceptorClassName, InterceptHandler.class, IServer.class, server);
             if (handler != null) {
                 observers.add(handler);
             }
