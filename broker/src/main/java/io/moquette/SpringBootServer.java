@@ -35,6 +35,7 @@ public class SpringBootServer {
             NettyAcceptor acceptor = new NettyAcceptor();
             final SpringMqttServer server = new SpringMqttServer(protocolProcessorBootstrapper, acceptor);
             List<InterceptHandler> handlers = new ArrayList<>();
+            interceptor.setPublisher(server::internalPublish);
             handlers.add(interceptor);
             server.startServer(config, handlers, null, authenticator, authorizator);
             System.out.println("Server started, version 0.11-SNAPSHOT");
