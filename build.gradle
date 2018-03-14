@@ -10,11 +10,14 @@ buildscript {
     maven {
       url "https://plugins.gradle.org/m2/"
     }
+    maven { url "https://repo.spring.io/snapshot/" }
+    maven { url "https://repo.spring.io/milestone/" }
   }
   dependencies {
-    classpath 'net.ltgt.gradle:gradle-errorprone-plugin:0.0.8'
+    classpath 'net.ltgt.gradle:gradle-errorprone-plugin:0.0.10'
     classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
     classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.0.RELEASE"
     classpath "io.spring.gradle:dependency-management-plugin:1.0.4.RELEASE"
   }
 }
@@ -29,6 +32,8 @@ subprojects {
     maven { url "http://repo.maven.apache.org/maven2" }
     maven { url "https://repo.spring.io/snapshot" }
     maven { url "https://repo.spring.io/milestone" }
+    maven { url "https://repo.spring.io/libs-milestone" }
+    maven { url "https://repo.spring.io/libs-snapshot" }
     jcenter()
   }
 
@@ -38,6 +43,7 @@ subprojects {
   apply plugin: 'com.jfrog.bintray'
   apply plugin: 'eclipse'
   apply plugin: 'net.ltgt.errorprone'
+  apply plugin: "org.springframework.boot"
   apply plugin: "io.spring.dependency-management"
   configurations.errorprone {
     resolutionStrategy.force 'com.google.errorprone:error_prone_core:2.0.14'
@@ -45,8 +51,8 @@ subprojects {
 
   ext {
     //nettyVersion = '4.1.12.Final'
-    springBootVersion = '2.0.0.RC1'
-    springCloudVersion = 'Finchley.M5'
+    springBootVersion = '2.0.0.RELEASE'
+    springCloudVersion = 'Finchley.M8'
   }
 
   task packageTests(type: Jar) {

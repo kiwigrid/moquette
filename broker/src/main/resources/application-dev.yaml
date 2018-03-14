@@ -1,0 +1,34 @@
+host: 0.0.0.0
+port: 1885
+server.port: 13444
+management:
+  endpoint:
+    health:
+      enabled: true
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: prometheus,info,health
+
+
+spring:
+  rabbitmq:
+    host: 10.66.0.1
+    port: 5672
+    username: guest
+    password: guest
+  cloud:
+    stream:
+      bindings:
+        output:
+          destination: test
+        input:
+          destination: test
+    gcp:
+      project-id: emtdev-184813
+      credentials:
+        #location: file:///home/rico/.gcloud/emtdev-efd77f4bf0eb.json
+        location: file:///home/rico/.gcloud/emtdev-ca5c5c2614d4.json
+        scopes: DEFAULT_SCOPES,https://www.googleapis.com/auth/pubsub,https://www.googleapis.com/auth/cloud-platform

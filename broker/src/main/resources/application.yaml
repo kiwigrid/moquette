@@ -1,0 +1,13 @@
+host: 0.0.0.0
+port: 1885
+server.port: 13444
+management:
+  endpoint:
+    health:
+      enabled: true
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: prometheus,info,health

@@ -5,6 +5,17 @@ dependencies {
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
     //compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-webflux'
+    //compile group: 'org.springframework.cloud', name: 'spring-cloud-stream'
+    //compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-stream-rabbit'
+    compile group: 'org.springframework.integration', name: 'spring-integration-core'
+    compile group: 'org.springframework.cloud', name: 'spring-cloud-gcp-starter-pubsub', version: '1.0.0.M2'
+    //compile group: 'org.springframework.cloud', name: 'spring-cloud-gcp-starter-pubsub', version: '1.0.0.BUILD-SNAPSHOT'
+
+    compile group: 'com.google.guava', name: 'guava', version: '20.0'
+    compile group: 'io.grpc', name: 'grpc-netty', version: '1.10.0'
+    compile group: 'io.grpc', name: 'grpc-auth', version: '1.10.0'
+    compile group: 'io.grpc', name: 'grpc-protobuf', version: '1.10.0'
+    compile group: 'io.grpc', name: 'grpc-stub', version: '1.10.0'
 
     compile group: 'io.netty', name: 'netty-common'
     compile group: 'io.netty', name: 'netty-buffer'
@@ -29,6 +40,9 @@ dependencies {
     compile group: 'commons-codec', name: 'commons-codec', version:'1.10'
     // compile group: 'org.hdrhistogram', name: 'HdrHistogram', version:'2.1.4'
     compile group: 'com.hazelcast', name: 'hazelcast', version:'3.5.4'
+    compileOnly group: 'org.projectlombok', name: 'lombok', version:'1.16.20'
+
+    runtime group: 'io.micrometer', name : 'micrometer-registry-prometheus'
 
     testCompile group: 'org.fusesource.mqtt-client', name: 'mqtt-client', version:'1.12'
     testCompile group: 'org.eclipse.paho', name: 'org.eclipse.paho.client.mqttv3', version:'1.0.2'

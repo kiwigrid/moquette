@@ -55,9 +55,9 @@ public final class DropWizardMetricsHandler extends ChannelInboundHandlerAdapter
         final String token = props.getProperty(METRICS_LIBRATO_TOKEN_PROPERTY_NAME);
         final String source = props.getProperty(METRICS_LIBRATO_SOURCE_PROPERTY_NAME);
 
-        Librato.reporter(this.metrics, email, token)
+/*        Librato.reporter(this.metrics, email, token)
             .setSource(source)
-            .start(10, TimeUnit.SECONDS);
+            .start(10, TimeUnit.SECONDS);*/
     }
 
     @Override
