@@ -39,7 +39,7 @@ public class SpringIntegrationInterceptor extends AbstractInterceptHandler imple
     private final MessageChannel integrationOutputChannel;
 
     @PostConstruct
-    public void init(){
+    public void init() {
         integrationInputChannel.subscribe(this);
     }
 
@@ -57,10 +57,7 @@ public class SpringIntegrationInterceptor extends AbstractInterceptHandler imple
             logger.debug("Publishing 'null' message in the cloud.");
         }
 
-        final Message<String> externalMsg = MessageBuilder
-            .withPayload(msg.getPayload().toString(Charset.forName("UTF8")))
-            .setHeader("userName",msg.getUsername())
-            .build();
+        final Message<String> externalMsg = MessageBuilder.withPayload(msg.getPayload().toString(Charset.forName("UTF8"))).setHeader("serial", msg.getUsername()).build();
 
         integrationOutputChannel.send(externalMsg);
     }
@@ -69,14 +66,24 @@ public class SpringIntegrationInterceptor extends AbstractInterceptHandler imple
         this.publisher = publisher;
     }
 
+    public static final String CLIENT_RESPONSE_TOPIC = "/kiwibus/%s/response";
+    public static final String SERVER_BROADCAST_TOPIC = "/kiwibus/%s/broadcast/EM_%s";
+
     @Override
     public void handleMessage(Message<?> message) throws MessagingException {
         logger.info("Message arrived! Payload: " + message.getPayload());
-        AckReplyConsumer consumer =
-            (AckReplyConsumer) message.getHeaders().get(GcpHeaders.ACKNOWLEDGEMENT);
+        AckReplyConsumer consumer = (AckReplyConsumer) message.getHeaders().get(GcpHeaders.ACKNOWLEDGEMENT);
         MqttQoS qos = MqttQoS.valueOf(1);
         MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, false, qos, false, 0);
-        MqttPublishVariableHeader varHeader = new MqttPublishVariableHeader("/out", 0);
+            Object broadcastHeader = message.getHeaders().get("broadcast");
+        Object serial = message.getHeaders().get("serial");
+        MqttPublishVariableHeader varHeader;
+        if (broadcastHeader != null && broadcastHeader.equals("true")) {
+            varHeader = new MqttPublishVariableHeader(String.format(SERVER_BROADCAST_TOPIC, serial, serial), 0);
+        } else {
+            varHeader = new MqttPublishVariableHeader(String.format(CLIENT_RESPONSE_TOPIC, serial), 0);
+        }
+
         final ByteBuf payload = Unpooled.wrappedBuffer(message.getPayload().toString().getBytes());
         MqttPublishMessage publishMessage = new MqttPublishMessage(fixedHeader, varHeader, payload);
 
