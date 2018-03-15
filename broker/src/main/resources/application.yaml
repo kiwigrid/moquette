@@ -1,6 +1,5 @@
 host: 0.0.0.0
 port: 1883
-server.port: 13444
 management:
   endpoint:
     health:

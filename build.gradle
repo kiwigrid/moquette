@@ -12,6 +12,7 @@ buildscript {
     }
     maven { url "https://repo.spring.io/snapshot/" }
     maven { url "https://repo.spring.io/milestone/" }
+    jcenter()
   }
   dependencies {
     classpath 'net.ltgt.gradle:gradle-errorprone-plugin:0.0.10'
@@ -19,6 +20,10 @@ buildscript {
     classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
     classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.0.RELEASE"
     classpath "io.spring.gradle:dependency-management-plugin:1.0.4.RELEASE"
+
+    classpath 'com.bmuschko:gradle-docker-plugin:3.2.5'
+
+
   }
 }
 
@@ -45,6 +50,7 @@ subprojects {
   apply plugin: 'net.ltgt.errorprone'
   apply plugin: "org.springframework.boot"
   apply plugin: "io.spring.dependency-management"
+  apply plugin: 'com.bmuschko.docker-remote-api'
   configurations.errorprone {
     resolutionStrategy.force 'com.google.errorprone:error_prone_core:2.0.14'
   }

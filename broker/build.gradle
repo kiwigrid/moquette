@@ -1,52 +1,85 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 
 description = 'Moquette - broker'
 
 dependencies {
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
-    //compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-webflux'
-    //compile group: 'org.springframework.cloud', name: 'spring-cloud-stream'
-    //compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-stream-rabbit'
-    compile group: 'org.springframework.integration', name: 'spring-integration-core'
-    compile group: 'org.springframework.cloud', name: 'spring-cloud-gcp-starter-pubsub', version: '1.0.0.M2'
-    //compile group: 'org.springframework.cloud', name: 'spring-cloud-gcp-starter-pubsub', version: '1.0.0.BUILD-SNAPSHOT'
+  compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
+  compile group: 'org.springframework.boot', name: 'spring-boot-starter-webflux'
+  compile group: 'org.springframework.integration', name: 'spring-integration-core'
+  compile group: 'org.springframework.cloud', name: 'spring-cloud-gcp-starter-pubsub', version: '1.0.0.M2'
 
-    compile group: 'com.google.guava', name: 'guava', version: '20.0'
-    compile group: 'io.grpc', name: 'grpc-netty', version: '1.10.0'
-    compile group: 'io.grpc', name: 'grpc-auth', version: '1.10.0'
-    compile group: 'io.grpc', name: 'grpc-protobuf', version: '1.10.0'
-    compile group: 'io.grpc', name: 'grpc-stub', version: '1.10.0'
+  compile group: 'com.google.guava', name: 'guava', version: '20.0'
+  compile group: 'io.grpc', name: 'grpc-netty', version: '1.10.0'
+  compile group: 'io.grpc', name: 'grpc-auth', version: '1.10.0'
+  compile group: 'io.grpc', name: 'grpc-protobuf', version: '1.10.0'
+  compile group: 'io.grpc', name: 'grpc-stub', version: '1.10.0'
 
-    compile group: 'io.netty', name: 'netty-common'
-    compile group: 'io.netty', name: 'netty-buffer'
-    compile group: 'io.netty', name: 'netty-transport'
-    compile group: 'io.netty', name: 'netty-handler'
-    compile group: 'io.netty', name: 'netty-codec'
-    compile group: 'io.netty', name: 'netty-codec-http'
-    compile group: 'io.netty', name: 'netty-codec-mqtt'
+  compile group: 'io.netty', name: 'netty-common'
+  compile group: 'io.netty', name: 'netty-buffer'
+  compile group: 'io.netty', name: 'netty-transport'
+  compile group: 'io.netty', name: 'netty-handler'
+  compile group: 'io.netty', name: 'netty-codec'
+  compile group: 'io.netty', name: 'netty-codec-http'
+  compile group: 'io.netty', name: 'netty-codec-mqtt'
 
-    compile group: 'io.netty', name: 'netty-transport-native-epoll', classifier: 'linux-x86_64'
-    // <classifier>${os.detected.name}-${os.detected.arch}</classifier>
+  compile group: 'io.netty', name: 'netty-transport-native-epoll', classifier: 'linux-x86_64'
 
-    compile group: 'com.zaxxer', name: 'HikariCP', version:'2.4.7'
+  compile group: 'com.zaxxer', name: 'HikariCP', version: '2.4.7'
 
-    compile group: 'io.dropwizard.metrics', name: 'metrics-core', version:'3.2.2'
-    compile group: 'io.dropwizard.metrics', name: 'metrics-jvm', version:'3.2.2'
+  compile group: 'io.dropwizard.metrics', name: 'metrics-core', version: '3.2.2'
+  compile group: 'io.dropwizard.metrics', name: 'metrics-jvm', version: '3.2.2'
 
-    compile group: 'com.librato.metrics', name: 'metrics-librato', version:'5.1.0'
-    compile group: 'com.librato.metrics', name: 'librato-java' , version:'2.1.0'
-    compile group: 'com.bugsnag', name: 'bugsnag', version:'[3.0,4.0)'
+  compile group: 'com.librato.metrics', name: 'metrics-librato', version: '5.1.0'
+  compile group: 'com.librato.metrics', name: 'librato-java', version: '2.1.0'
+  compile group: 'com.bugsnag', name: 'bugsnag', version: '[3.0,4.0)'
 
-    compile group: 'commons-codec', name: 'commons-codec', version:'1.10'
-    // compile group: 'org.hdrhistogram', name: 'HdrHistogram', version:'2.1.4'
-    compile group: 'com.hazelcast', name: 'hazelcast', version:'3.5.4'
-    compileOnly group: 'org.projectlombok', name: 'lombok', version:'1.16.20'
+  compile group: 'commons-codec', name: 'commons-codec', version: '1.10'
+  // compile group: 'org.hdrhistogram', name: 'HdrHistogram', version:'2.1.4'
+  compile group: 'com.hazelcast', name: 'hazelcast', version: '3.5.4'
+  compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
 
-    runtime group: 'io.micrometer', name : 'micrometer-registry-prometheus'
+  runtime group: 'io.micrometer', name: 'micrometer-registry-prometheus'
 
-    testCompile group: 'org.fusesource.mqtt-client', name: 'mqtt-client', version:'1.12'
-    testCompile group: 'org.eclipse.paho', name: 'org.eclipse.paho.client.mqttv3', version:'1.0.2'
-    testCompile group: 'org.eclipse.jetty.websocket', name: 'websocket-client'
+  testCompile group: 'org.fusesource.mqtt-client', name: 'mqtt-client', version: '1.12'
+  testCompile group: 'org.eclipse.paho', name: 'org.eclipse.paho.client.mqttv3', version: '1.0.2'
+  testCompile group: 'org.eclipse.jetty.websocket', name: 'websocket-client'
 
-    testCompile group: 'com.h2database', name: 'h2'
+  testCompile group: 'com.h2database', name: 'h2'
 }
+
+task copyJar(type: Copy) {
+  dependsOn 'jar'
+  from "build/libs/moquette-broker-${project.version}.jar"
+  into 'build/docker'
+  rename { String fileName ->
+    fileName.replace("-${project.version}", "")
+  }
+}
+
+task copyDocker(type: Copy) {
+  dependsOn 'jar'
+  from "src/main/docker"
+  into 'build/docker'
+  filter(ReplaceTokens, tokens: [version: project.version])
+}
+
+task buildDockerImage(type: DockerBuildImage) {
+  dependsOn copyJar
+  dependsOn copyDocker
+  if (System.env.DOCKER_HOST) {
+    url = "$System.env.DOCKER_HOST".replace("tcp", "https")
+    if (System.env.DOCKER_CERT_PATH) {
+      certPath = new File(System.env.DOCKER_CERT_PATH)
+
+    }
+  } else {
+    url = 'unix:///var/run/docker.sock'
+  }
+  inputDir = file('build/docker')
+  tag = "docker.kiwigrid.com/emt/moquette:${project.version}"
+}
+
+build.dependsOn buildDockerImage
+build.dependsOn copyJar
+build.dependsOn copyDocker
