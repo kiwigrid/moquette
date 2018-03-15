@@ -24,6 +24,7 @@ import io.netty.handler.codec.mqtt.*;
 import io.netty.util.ReferenceCountUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import static io.netty.handler.codec.mqtt.MqttQoS.AT_MOST_ONCE;
 
 @Sharable
@@ -71,12 +72,7 @@ public class NettyMQTTHandler extends ChannelInboundHandlerAdapter {
                     m_processor.processPubAck(ctx.channel(), (MqttPubAckMessage) msg);
                     break;
                 case PINGREQ:
-                    MqttFixedHeader pingHeader = new MqttFixedHeader(
-                            MqttMessageType.PINGRESP,
-                            false,
-                            AT_MOST_ONCE,
-                            false,
-                            0);
+                    MqttFixedHeader pingHeader = new MqttFixedHeader(MqttMessageType.PINGRESP, false, AT_MOST_ONCE, false, 0);
                     MqttMessage pingResp = new MqttMessage(pingHeader);
                     ctx.writeAndFlush(pingResp);
                     break;
@@ -105,8 +101,8 @@ public class NettyMQTTHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        LOG.error("An unexpected exception was caught while processing MQTT message. Closing Netty channel. CId={}, " +
-            "cause={}, errorMessage={}", NettyUtils.clientID(ctx.channel()), cause.getCause(), cause.getMessage());
+        LOG.error("An unexpected exception was caught while processing MQTT message. Closing Netty channel. CId={}, "
+                  "cause={}, errorMessage={} {}", NettyUtils.clientID(ctx.channel()), cause.getCause(), cause.getMessage(), cause);
         ctx.close();
     }
 
