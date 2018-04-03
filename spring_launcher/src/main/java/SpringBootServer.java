@@ -25,7 +25,7 @@ import java.util.List;
 @ComponentScan({"io.moquette.integration.rabbitmq", "io.moquette"})
 // @ComponentScan({"io.moquette.integration.pubsub", "io.moquette"})
 @SpringBootApplication
-public class AppConfiguration {
+public class SpringBootServer {
 
     @Autowired
     private SpringIntegrationInterceptor interceptor;
@@ -34,7 +34,7 @@ public class AppConfiguration {
     private SpringNettyAcceptor acceptor;
 
     public static void main(String[] args) throws IOException {
-        SpringApplication.run(AppConfiguration.class, args);
+        SpringApplication.run(SpringBootServer.class, args);
     }
 
     @Bean

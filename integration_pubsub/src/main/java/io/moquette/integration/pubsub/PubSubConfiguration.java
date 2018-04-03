@@ -73,17 +73,13 @@ public class PubSubConfiguration {
     @ServiceActivator(inputChannel = "integrationOutputChannel")
     public MessageHandler messageSender(PubSubTemplate pubsubTemplate) {
         PubSubMessageHandler pubSubMessageHandler = new PubSubMessageHandler(pubsubTemplate, googlePubsubProperties.getToPubsubCloudTopic());
-        pubSubMessageHandler.setPublishCallback(new ListenableFutureCallback<String>() {
-            @Override
-            public void onFailure(Throwable ex) {
-                logger.info("There was an error sending the message.");
-            }
+        return pubSubMessageHandler;
+    }
 
-            @Override
-            public void onSuccess(String result) {
-                logger.info("Message was sent successfully.");
-            }
-        });
+    @Bean
+    @ServiceActivator(inputChannel = "emLoggerOutputChannel")
+    public MessageHandler loggerMessageSender(PubSubTemplate pubsubTemplate) {
+        PubSubMessageHandler pubSubMessageHandler = new PubSubMessageHandler(pubsubTemplate, googlePubsubProperties.getEmLoggerTopic());
         return pubSubMessageHandler;
     }
 }

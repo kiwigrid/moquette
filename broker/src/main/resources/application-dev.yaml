@@ -1,0 +1,25 @@
+server:
+    port: 13445
+spring:
+  cloud:
+    gcp:
+      project-id: submetering-195709
+      #project-id: emtdev-184813
+      credentials:
+        #location: file:///home/rico/.gcloud/emtdev-efd77f4bf0eb.json
+        location: file:///home/rico/.gcloud/pubsubkey.json
+        scopes: DEFAULT_SCOPES,https://www.googleapis.com/auth/pubsub,https://www.googleapis.com/auth/cloud-platform
+
+logging:
+  level:
+    messageLogger: ERROR
+    io:
+      moquette:
+        server:
+          ConnectionDescriptorStore: ERROR
+        interception:
+          PubSubConfiguration: ERROR
+        spi:
+          impl:
+            MessagesPublisher: ERROR
+            ProtocolProcessor: ERROR

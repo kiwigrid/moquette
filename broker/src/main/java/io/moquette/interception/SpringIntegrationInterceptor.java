@@ -37,6 +37,8 @@ public class SpringIntegrationInterceptor extends AbstractInterceptHandler
 
     private final MessageChannel integrationOutputChannel;
 
+    private final MessageChannel emLoggerOutputChannel;
+
     @PostConstruct
     public void init() {
         integrationInputChannel.subscribe(this);
@@ -49,6 +51,28 @@ public class SpringIntegrationInterceptor extends AbstractInterceptHandler
 
     @Override
     public void onPublish(final InterceptPublishMessage msg) {
+        if (msg.getTopicName().contains("kiwibus")) {
+            handleKiwibus(msg);
+            return;
+        }
+        if (msg.getTopicName().contains("kiwi-connect.logger")) {
+            handleEmLog(msg);
+            return;
+        }
+    }
+
+    private void handleEmLog(InterceptPublishMessage msg) {
+        final ByteBuf payload = msg.getPayload();
+        if (null != payload) {
+            logger.debug("Publishing following message in the cloud: {}", payload.toString(Charset.defaultCharset()));
+        } else {
+            logger.debug("Publishing 'null' message in the cloud.");
+        }
+        final Message<String> externalMsg = MessageBuilder.withPayload(msg.getPayload().toString(Charset.forName("UTF8"))).setHeader("serial", msg.getUsername()).build();
+        emLoggerOutputChannel.send(externalMsg);
+    }
+
+    private void handleKiwibus(final InterceptPublishMessage msg) {
         final ByteBuf payload = msg.getPayload();
         if (null != payload) {
             logger.info("Publishing following message in the cloud: {}", payload.toString(Charset.defaultCharset()));
@@ -73,11 +97,11 @@ public class SpringIntegrationInterceptor extends AbstractInterceptHandler
 
     @Override
     public void handleMessage(Message<?> message) throws MessagingException {
-        logger.info("Message arrived! Payload: " + message.getPayload());
+        logger.debug("Message arrived! Payload: " + message.getPayload());
         //AckReplyConsumer consumer = (AckReplyConsumer) message.getHeaders().get(GcpHeaders.ACKNOWLEDGEMENT);
         MqttQoS qos = MqttQoS.valueOf(1);
         MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, false, qos, false, 0);
-            Object broadcastHeader = message.getHeaders().get("broadcast");
+        Object broadcastHeader = message.getHeaders().get("broadcast");
         Object serial = message.getHeaders().get("serial");
         MqttPublishVariableHeader varHeader;
         if (broadcastHeader != null && broadcastHeader.equals("true")) {

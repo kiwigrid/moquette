@@ -22,4 +22,9 @@ public class IntegrationConfiguration {
         return new DirectChannel();
     }
 
+    @Bean
+    public MessageChannel emLoggerOutputChannel() {
+        return new DirectChannel();
+    }
+
 }
