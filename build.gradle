@@ -15,15 +15,13 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath 'net.ltgt.gradle:gradle-errorprone-plugin:0.0.10'
+    classpath 'net.ltgt.gradle:gradle-errorprone-plugin:0.0.13'
+    classpath 'gradle.plugin.com.github.spotbugs:gradlePlugin:1.6.0'
     classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
     classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
     classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.0.RELEASE"
     classpath "io.spring.gradle:dependency-management-plugin:1.0.4.RELEASE"
-
     classpath 'com.bmuschko:gradle-docker-plugin:3.2.5'
-
-
   }
 }
 
@@ -34,7 +32,7 @@ subprojects {
 
     maven { url "https://repo.eclipse.org/content/repositories/paho-releases/" }
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-    maven { url "http://repo.maven.apache.org/maven2" }
+    maven { url "https://repo.maven.apache.org/maven2" }
     maven { url "https://repo.spring.io/snapshot" }
     maven { url "https://repo.spring.io/milestone" }
     maven { url "https://repo.spring.io/libs-milestone" }
@@ -47,13 +45,8 @@ subprojects {
   apply from: new File(rootDir, 'gradle/lint.gradle')
   apply plugin: 'com.jfrog.bintray'
   apply plugin: 'eclipse'
-  apply plugin: 'net.ltgt.errorprone'
-  apply plugin: "org.springframework.boot"
   apply plugin: "io.spring.dependency-management"
   apply plugin: 'com.bmuschko.docker-remote-api'
-  configurations.errorprone {
-    resolutionStrategy.force 'com.google.errorprone:error_prone_core:2.0.14'
-  }
 
   ext {
     //nettyVersion = '4.1.12.Final'
@@ -111,5 +104,5 @@ subprojects {
 }
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '3.3'
+  gradleVersion = '4.6'
 }

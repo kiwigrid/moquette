@@ -1,3 +1,5 @@
+package io.moquette;
+
 import io.moquette.interception.InterceptHandler;
 import io.moquette.interception.SpringIntegrationInterceptor;
 import io.moquette.server.SpringMqttServer;
