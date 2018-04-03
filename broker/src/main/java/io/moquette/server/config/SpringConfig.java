@@ -1,11 +1,14 @@
 package io.moquette.server.config;
 
+import io.moquette.server.netty.metrics.MicrometerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 @Component
+@EnableConfigurationProperties({MicrometerConfig.class})
 public class SpringConfig extends IConfig {
 
     private static Logger logger = LoggerFactory.getLogger(SpringConfig.class);

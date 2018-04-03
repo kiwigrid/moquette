@@ -6,17 +6,16 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @author Shalbanov, Kostiantyn (kostiantyn.shalbanov@intecsoft.de)
  */
-@Configuration
 @ConfigurationProperties(prefix = "micrometer")
 public class MicrometerConfig {
 
-    private boolean enable = false;
+    private boolean enabled = false;
 
-    public boolean isEnable() {
-        return enable;
+    public boolean isEnabled() {
+        return enabled;
     }
 
-    public void setEnable(final boolean enable) {
-        this.enable = enable;
+    public void setEnabled(final boolean enabled) {
+        this.enabled = enabled;
     }
 }

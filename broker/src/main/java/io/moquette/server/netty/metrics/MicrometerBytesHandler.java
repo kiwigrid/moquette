@@ -1,33 +1,65 @@
 package io.moquette.server.netty.metrics;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.Metrics;
+import io.moquette.server.netty.NettyUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Shalbanov, Kostiantyn (kostiantyn.shalbanov@intecsoft.de)
  */
 public class MicrometerBytesHandler extends ChannelDuplexHandler {
-    private DistributionSummary readMsgs;
-    private DistributionSummary writtenMsgs;
+
+    private static Logger logger = LoggerFactory.getLogger(MicrometerBytesHandler.class);
+    private String[] tags;
 
     public MicrometerBytesHandler(final String... tags) {
-        this.readMsgs = Metrics.summary("mqtt.messages.bytes.read", tags);
-        this.writtenMsgs = Metrics.summary("mqtt.messages.bytes.wrote", tags);
+        this.tags = tags;
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        readMsgs.record(((ByteBuf) msg).readableBytes());
+        try {
+            String clientID = NettyUtils.clientID(ctx.channel());
+            String userName = NettyUtils.userName(ctx.channel());
+            List<String> listTags = new ArrayList<>(Arrays.asList(tags));
+            listTags.add("clientId");
+            listTags.add(clientID);
+            listTags.add("userName");
+            listTags.add(userName);
+            Metrics.summary("mqtt.messages.bytes.read", listTags.toArray(new String[listTags.size()])).record(((ByteBuf) msg).readableBytes());
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+
         ctx.fireChannelRead(msg);
     }
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        writtenMsgs.record(((ByteBuf) msg).readableBytes());
+        try {
+            String clientID = NettyUtils.clientID(ctx.channel());
+            String userName = NettyUtils.userName(ctx.channel());
+            List<String> listTags = new ArrayList<>(Arrays.asList(tags));
+
+            listTags.add("clientId");
+            listTags.add(clientID);
+            listTags.add("userName");
+            listTags.add(userName);
+            Metrics.summary("mqtt.messages.bytes.wrote", listTags.toArray(new String[listTags.size()])).record(((ByteBuf) msg).readableBytes());
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+
         ctx.write(msg, promise);
     }
 }

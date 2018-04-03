@@ -219,7 +219,6 @@ public class SpringNettyAcceptor implements ServerAcceptor {
                 if (metrics.isPresent()) {
                     pipeline.addLast("wizardMetrics", metrics.get());
                 }
-
                 addMicrometerHandlers(pipeline, "tcp");
 
                 pipeline.addLast("handler", handler);
@@ -401,7 +400,7 @@ public class SpringNettyAcceptor implements ServerAcceptor {
     }
 
     private void addMicrometerHandlers(final ChannelPipeline pipeline, final String protocolTag) {
-        if (micrometerConfig.isEnable()) {
+        if (micrometerConfig.isEnabled()) {
             final String[] tags = new String[]{"protocol", protocolTag};
             pipeline.addFirst("byteMetricsMicrometer", new MicrometerBytesHandler(tags));
             pipeline.addLast("msgMetricsMicrometer", new MicrometerMessageHandler(tags));
