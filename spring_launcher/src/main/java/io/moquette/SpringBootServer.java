@@ -24,8 +24,8 @@ import java.util.List;
  */
 // @Component("ConnectToPubSub")
 // @Component("ConnectToRabitMQ")
-@ComponentScan({"io.moquette.integration.rabbitmq", "io.moquette"})
-// @ComponentScan({"io.moquette.integration.pubsub", "io.moquette"})
+// @ComponentScan({"io.moquette.integration.rabbitmq", "io.moquette"})
+@ComponentScan({"io.moquette.integration.pubsub", "io.moquette"})
 @SpringBootApplication
 public class SpringBootServer {
 

@@ -31,8 +31,8 @@ repositories {
 
 dependencies {
   compile project(':moquette-broker')
-  compile project(':integration_rabbitmq')
-  //compile project(':integration_pubsub')
+  //compile project(':integration_rabbitmq')
+  compile project(':integration_pubsub')
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
   compile group: 'io.netty', name: 'netty-handler'
   compile group: 'io.netty', name: 'netty-codec-mqtt'

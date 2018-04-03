@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
  */
 public class MicrometerBytesHandler extends ChannelDuplexHandler {
 
-    private static Logger logger = LoggerFactory.getLogger(MicrometerBytesHandler.class);
     private String[] tags;
 
     public MicrometerBytesHandler(final String... tags) {
@@ -28,38 +27,29 @@ public class MicrometerBytesHandler extends ChannelDuplexHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        try {
-            String clientID = NettyUtils.clientID(ctx.channel());
-            String userName = NettyUtils.userName(ctx.channel());
+        String clientID = NettyUtils.clientID(ctx.channel());
+        String userName = NettyUtils.userName(ctx.channel());
+        if (userName != null && clientID != null) {
             List<String> listTags = new ArrayList<>(Arrays.asList(tags));
             listTags.add("clientId");
             listTags.add(clientID);
             listTags.add("userName");
             listTags.add(userName);
             Metrics.summary("mqtt.messages.bytes.read", listTags.toArray(new String[listTags.size()])).record(((ByteBuf) msg).readableBytes());
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
         }
-
         ctx.fireChannelRead(msg);
     }
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        try {
-            String clientID = NettyUtils.clientID(ctx.channel());
-            String userName = NettyUtils.userName(ctx.channel());
-            List<String> listTags = new ArrayList<>(Arrays.asList(tags));
-
-            listTags.add("clientId");
-            listTags.add(clientID);
-            listTags.add("userName");
-            listTags.add(userName);
-            Metrics.summary("mqtt.messages.bytes.wrote", listTags.toArray(new String[listTags.size()])).record(((ByteBuf) msg).readableBytes());
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-        }
-
+        String clientID = NettyUtils.clientID(ctx.channel());
+        String userName = NettyUtils.userName(ctx.channel());
+        List<String> listTags = new ArrayList<>(Arrays.asList(tags));
+        listTags.add("clientId");
+        listTags.add(clientID);
+        listTags.add("userName");
+        listTags.add(userName);
+        Metrics.summary("mqtt.messages.bytes.wrote", listTags.toArray(new String[listTags.size()])).record(((ByteBuf) msg).readableBytes());
         ctx.write(msg, promise);
     }
 }
