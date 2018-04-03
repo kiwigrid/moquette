@@ -19,9 +19,8 @@ buildscript {
     classpath 'gradle.plugin.com.github.spotbugs:gradlePlugin:1.6.0'
     classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
     classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
-    classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.0.RELEASE"
+    //classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.0.RELEASE"
     classpath "io.spring.gradle:dependency-management-plugin:1.0.4.RELEASE"
-    classpath 'com.bmuschko:gradle-docker-plugin:3.2.5'
   }
 }
 
@@ -46,7 +45,6 @@ subprojects {
   apply plugin: 'com.jfrog.bintray'
   apply plugin: 'eclipse'
   apply plugin: "io.spring.dependency-management"
-  apply plugin: 'com.bmuschko.docker-remote-api'
 
   ext {
     //nettyVersion = '4.1.12.Final'

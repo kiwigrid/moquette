@@ -1,6 +1,3 @@
-import org.apache.tools.ant.filters.ReplaceTokens
-import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
-
 description = 'Moquette - broker'
 
 dependencies {
@@ -47,39 +44,3 @@ dependencies {
 
   testCompile group: 'com.h2database', name: 'h2'
 }
-
-task copyJar(type: Copy) {
-  dependsOn 'jar'
-  from "build/libs/moquette-broker-${project.version}.jar"
-  into 'build/docker'
-  rename { String fileName ->
-    fileName.replace("-${project.version}", "")
-  }
-}
-
-task copyDocker(type: Copy) {
-  dependsOn 'jar'
-  from "src/main/docker"
-  into 'build/docker'
-  filter(ReplaceTokens, tokens: [version: project.version])
-}
-
-task buildDockerImage(type: DockerBuildImage) {
-  dependsOn copyJar
-  dependsOn copyDocker
-  if (System.env.DOCKER_HOST) {
-    url = "$System.env.DOCKER_HOST".replace("tcp", "https")
-    if (System.env.DOCKER_CERT_PATH) {
-      certPath = new File(System.env.DOCKER_CERT_PATH)
-
-    }
-  } else {
-    url = 'unix:///var/run/docker.sock'
-  }
-  inputDir = file('build/docker')
-  tag = "docker.kiwigrid.com/emt/moquette:${project.version}"
-}
-
-build.dependsOn buildDockerImage
-build.dependsOn copyJar
-build.dependsOn copyDocker

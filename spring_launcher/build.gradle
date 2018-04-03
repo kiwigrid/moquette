@@ -1,8 +1,27 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+
 group 'io.moquette'
 version '0.0.11-SNAPSHOT'
 
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+    maven { url "https://repo.spring.io/snapshot/" }
+    maven { url "https://repo.spring.io/milestone/" }
+    jcenter()
+  }
+  dependencies {
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.0.RELEASE"
+    classpath 'com.bmuschko:gradle-docker-plugin:3.2.5'
+  }
+}
+
 apply plugin: 'java'
 apply plugin: "org.springframework.boot"
+apply plugin: 'com.bmuschko.docker-remote-api'
 
 sourceCompatibility = 1.8
 
@@ -18,5 +37,41 @@ dependencies {
   compile group: 'io.netty', name: 'netty-handler'
   compile group: 'io.netty', name: 'netty-codec-mqtt'
   testCompile group: 'junit', name: 'junit', version: '4.12'
-
 }
+
+
+task copyJar(type: Copy) {
+  dependsOn 'jar'
+  from "build/libs/spring_launcher-${project.version}.jar"
+  into 'build/docker'
+  rename { String fileName ->
+    fileName.replace("-${project.version}", "")
+  }
+}
+
+task copyDocker(type: Copy) {
+  dependsOn 'jar'
+  from "src/main/docker"
+  into 'build/docker'
+  filter(ReplaceTokens, tokens: [version: project.version])
+}
+
+task buildDockerImage(type: DockerBuildImage) {
+  dependsOn copyJar
+  dependsOn copyDocker
+  if (System.env.DOCKER_HOST) {
+    url = "$System.env.DOCKER_HOST".replace("tcp", "https")
+    if (System.env.DOCKER_CERT_PATH) {
+      certPath = new File(System.env.DOCKER_CERT_PATH)
+
+    }
+  } else {
+    url = 'unix:///var/run/docker.sock'
+  }
+  inputDir = file('build/docker')
+  tag = "docker.kiwigrid.com/emt/moquette:${project.version}"
+}
+
+build.dependsOn buildDockerImage
+build.dependsOn copyJar
+build.dependsOn copyDocker
