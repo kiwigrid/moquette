@@ -14,6 +14,7 @@ import org.springframework.cloud.gcp.pubsub.integration.inbound.PubSubInboundCha
 import org.springframework.cloud.gcp.pubsub.integration.outbound.PubSubMessageHandler;
 import org.springframework.cloud.gcp.pubsub.support.GcpHeaders;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
@@ -22,8 +23,7 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 import javax.annotation.PreDestroy;
 import java.util.UUID;
 
-@ConditionalOnBean(name = "pubSub")
-@EnableAutoConfiguration
+@Configuration
 @EnableConfigurationProperties(GooglePubsubProperties.class)
 public class PubSubConfiguration {
 
@@ -72,6 +72,7 @@ public class PubSubConfiguration {
     @Bean
     @ServiceActivator(inputChannel = "integrationOutputChannel")
     public MessageHandler messageSender(PubSubTemplate pubsubTemplate) {
+        logger.info("integrationOutputChannel");
         PubSubMessageHandler pubSubMessageHandler = new PubSubMessageHandler(pubsubTemplate, googlePubsubProperties.getToPubsubCloudTopic());
         return pubSubMessageHandler;
     }
@@ -79,6 +80,7 @@ public class PubSubConfiguration {
     @Bean
     @ServiceActivator(inputChannel = "emLoggerOutputChannel")
     public MessageHandler loggerMessageSender(PubSubTemplate pubsubTemplate) {
+        logger.info("emLoggerOutputChannel");
         PubSubMessageHandler pubSubMessageHandler = new PubSubMessageHandler(pubsubTemplate, googlePubsubProperties.getEmLoggerTopic());
         return pubSubMessageHandler;
     }

@@ -82,7 +82,7 @@ public class SpringIntegrationInterceptor extends AbstractInterceptHandler
 
         final Message<String> externalMsg = MessageBuilder
             .withPayload(msg.getPayload().toString(Charset.forName("UTF8")))
-            .setHeader("userName",msg.getUsername())
+            .setHeader("serial",msg.getUsername())
             .build();
 
         integrationOutputChannel.send(externalMsg);
