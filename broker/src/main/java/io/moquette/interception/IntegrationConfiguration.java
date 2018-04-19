@@ -12,7 +12,7 @@ import org.springframework.messaging.SubscribableChannel;
 @Configuration
 public class IntegrationConfiguration {
 
-    @Bean
+    @Bean("integrationInputChannel")
     public SubscribableChannel integrationInputChannel() {
         return new DirectChannel();
     }
@@ -27,4 +27,13 @@ public class IntegrationConfiguration {
         return new DirectChannel();
     }
 
+    @Bean
+    public MessageChannel kiwiConnectOutputChannel() {
+        return new DirectChannel();
+    }
+
+    @Bean("kiwiConnectCloudInputChannel")
+    SubscribableChannel kiwiConnectCloudInputChannel() {
+        return new DirectChannel();
+    }
 }

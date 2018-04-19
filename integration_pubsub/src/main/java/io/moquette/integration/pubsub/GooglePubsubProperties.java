@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class GooglePubsubProperties {
     private String toPubsubCloudTopic = "legacy-kiwibus-to-cloud";
     private String fromPubsubCloudTopic = "legacy-kiwibus-from-cloud";
+    private String mqttTopic = "kiwiconnect-to-mqtt";
     private String emLoggerTopic = "em-log";
 
 }

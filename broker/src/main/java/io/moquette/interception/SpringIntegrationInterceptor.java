@@ -1,5 +1,8 @@
 package io.moquette.interception;
 
+import javax.annotation.PostConstruct;
+import java.nio.charset.Charset;
+
 import io.moquette.interception.messages.InterceptPublishMessage;
 import io.moquette.server.InternalPublisher;
 import io.netty.buffer.ByteBuf;
@@ -13,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.gcp.pubsub.support.GcpPubSubHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
@@ -21,13 +25,9 @@ import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.nio.charset.Charset;
-
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class SpringIntegrationInterceptor extends AbstractInterceptHandler
-                                            implements MessageHandler {
+public class SpringIntegrationInterceptor extends AbstractInterceptHandler implements MessageHandler {
 
     private static Logger logger = LoggerFactory.getLogger(SpringIntegrationInterceptor.class);
 
@@ -39,9 +39,20 @@ public class SpringIntegrationInterceptor extends AbstractInterceptHandler
 
     private final MessageChannel emLoggerOutputChannel;
 
+    private final MessageChannel kiwiConnectOutputChannel;
+
+    @Autowired
+    private SubscribableChannel kiwiConnectCloudInputChannel;
+
     @PostConstruct
     public void init() {
-        integrationInputChannel.subscribe(this);
+        try {
+            integrationInputChannel.subscribe(this);
+            kiwiConnectCloudInputChannel.subscribe(this);
+        } catch (Exception e) {
+
+        }
+
     }
 
     @Override
@@ -55,10 +66,26 @@ public class SpringIntegrationInterceptor extends AbstractInterceptHandler
             handleKiwibus(msg);
             return;
         }
-        if (msg.getTopicName().contains("kiwi-connect.logger")) {
+        if (msg.getTopicName().contains("kiwi-connect/logger")) {
             handleEmLog(msg);
             return;
         }
+        if (msg.getTopicName().contains("kiwi-connect")) {
+            handleKiwiConnect(msg);
+            return;
+        }
+    }
+
+    private void handleKiwiConnect(InterceptPublishMessage msg) {
+        final ByteBuf payload = msg.getPayload();
+        if (null != payload) {
+            logger.debug("Publishing following message in the cloud: {}", payload.toString(Charset.defaultCharset()));
+        } else {
+            logger.debug("Publishing 'null' message in the cloud.");
+        }
+        String destination = msg.getTopicName().replace("/", ".");
+        final Message<?> externalMsg = MessageBuilder.withPayload(msg.getPayload().toString(Charset.forName("UTF8"))).setHeader(GcpPubSubHeaders.TOPIC, destination).setHeader("KIWICONNECT_FROM", destination).setHeader("serial", msg.getUsername()).build();
+        kiwiConnectOutputChannel.send(externalMsg);
     }
 
     private void handleEmLog(InterceptPublishMessage msg) {
@@ -80,10 +107,7 @@ public class SpringIntegrationInterceptor extends AbstractInterceptHandler
             logger.info("Publishing 'null' message in the cloud.");
         }
 
-        final Message<String> externalMsg = MessageBuilder
-            .withPayload(msg.getPayload().toString(Charset.forName("UTF8")))
-            .setHeader("serial",msg.getUsername())
-            .build();
+        final Message<String> externalMsg = MessageBuilder.withPayload(msg.getPayload().toString(Charset.forName("UTF8"))).setHeader("serial", msg.getUsername()).build();
 
         integrationOutputChannel.send(externalMsg);
     }
@@ -97,24 +121,32 @@ public class SpringIntegrationInterceptor extends AbstractInterceptHandler
 
     @Override
     public void handleMessage(Message<?> message) throws MessagingException {
-        logger.debug("Message arrived! Payload: " + message.getPayload());
-        //AckReplyConsumer consumer = (AckReplyConsumer) message.getHeaders().get(GcpHeaders.ACKNOWLEDGEMENT);
+        logger.info("Message arrived! Payload: " + message.getPayload());
+        Object kiwiconnectDestination = message.getHeaders().get("KIWICONNECT_TO");
+
         MqttQoS qos = MqttQoS.valueOf(1);
         MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, false, qos, false, 0);
-        Object broadcastHeader = message.getHeaders().get("broadcast");
-        Object serial = message.getHeaders().get("serial");
         MqttPublishVariableHeader varHeader;
-        if (broadcastHeader != null && broadcastHeader.equals("true")) {
-            varHeader = new MqttPublishVariableHeader(String.format(SERVER_BROADCAST_TOPIC, serial, serial), 0);
+        MqttPublishMessage publishMessage;
+        if (kiwiconnectDestination != null) {
+            Object kiwiconnectSender = message.getHeaders().get("KIWICONNECT_FROM");
+            varHeader = new MqttPublishVariableHeader(String.format("kiwi-connect/%s", kiwiconnectDestination.toString().replace(".", "/")), 0);
+            final ByteBuf payload = Unpooled.wrappedBuffer(String.format("FROM: %s\n%s", kiwiconnectSender, message.getPayload().toString()).getBytes());
+            publishMessage = new MqttPublishMessage(fixedHeader, varHeader, payload);
         } else {
-            varHeader = new MqttPublishVariableHeader(String.format(CLIENT_RESPONSE_TOPIC, serial), 0);
+            Object broadcastHeader = message.getHeaders().get("broadcast");
+            Object serial = message.getHeaders().get("serial");
+
+            if (broadcastHeader != null && broadcastHeader.equals("true")) {
+                varHeader = new MqttPublishVariableHeader(String.format(SERVER_BROADCAST_TOPIC, serial, serial), 0);
+            } else {
+                varHeader = new MqttPublishVariableHeader(String.format(CLIENT_RESPONSE_TOPIC, serial), 0);
+            }
+            final ByteBuf payload = Unpooled.wrappedBuffer(message.getPayload().toString().getBytes());
+            publishMessage = new MqttPublishMessage(fixedHeader, varHeader, payload);
         }
-
-        final ByteBuf payload = Unpooled.wrappedBuffer(message.getPayload().toString().getBytes());
-        MqttPublishMessage publishMessage = new MqttPublishMessage(fixedHeader, varHeader, payload);
-
-        logger.debug("From the cloud received message is going to be published: {}", "");
         publisher.publish(publishMessage, "test");
+        logger.debug("From the cloud received message is going to be published: {}", "");
         //consumer.ack();
     }
 }

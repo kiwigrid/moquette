@@ -1,16 +1,12 @@
 description = 'Moquette - broker'
 
 dependencies {
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-webflux'
-  compile group: 'org.springframework.integration', name: 'spring-integration-core'
-  compile group: 'org.springframework.cloud', name: 'spring-cloud-gcp-starter-pubsub', version: '1.0.0.M2'
+  compileOnly group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
+  compileOnly group: 'org.springframework.boot', name: 'spring-boot-starter-webflux'
+  compileOnly group: 'org.springframework.integration', name: 'spring-integration-core'
+  compileOnly group: 'org.springframework.cloud', name: 'spring-cloud-gcp-starter-pubsub', version: '1.0.0.M3'
 
-  compile group: 'com.google.guava', name: 'guava', version: '20.0'
-  compile group: 'io.grpc', name: 'grpc-netty', version: '1.10.0'
-  compile group: 'io.grpc', name: 'grpc-auth', version: '1.10.0'
-  compile group: 'io.grpc', name: 'grpc-protobuf', version: '1.10.0'
-  compile group: 'io.grpc', name: 'grpc-stub', version: '1.10.0'
+  compileOnly group: 'com.google.guava', name: 'guava', version: '20.0'
 
   compile group: 'io.netty', name: 'netty-common'
   compile group: 'io.netty', name: 'netty-buffer'
