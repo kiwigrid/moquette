@@ -1,7 +1,9 @@
 package io.moquette.interception;
 
 import javax.annotation.PostConstruct;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 
 import io.moquette.interception.messages.InterceptPublishMessage;
 import io.moquette.server.InternalPublisher;
@@ -66,26 +68,66 @@ public class SpringIntegrationInterceptor extends AbstractInterceptHandler imple
             handleKiwibus(msg);
             return;
         }
-        if (msg.getTopicName().contains("kiwi-connect/logger")) {
-            handleEmLog(msg);
-            return;
-        }
         if (msg.getTopicName().contains("kiwi-connect")) {
-            handleKiwiConnect(msg);
+            try {
+                handleKiwiConnect(msg);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
             return;
         }
     }
 
     private void handleKiwiConnect(InterceptPublishMessage msg) {
         final ByteBuf payload = msg.getPayload();
+
         if (null != payload) {
             logger.debug("Publishing following message in the cloud: {}", payload.toString(Charset.defaultCharset()));
         } else {
             logger.debug("Publishing 'null' message in the cloud.");
         }
+
+        byte[] message = new byte[payload.readableBytes()];
+        payload.readBytes(message);
+        int headerEndIndex = -1;
+
+        for (int i = 0; i < message.length; i++) {
+            if (message[i] == '\n') {
+                headerEndIndex = i;
+                break;
+            }
+        }
+        String sender = "";
+        byte[] body = null;
+        if (headerEndIndex >= 0) {
+            byte[] fromHeader = Arrays.copyOf(message, headerEndIndex);
+            String fromHeaderString;
+            try {
+                fromHeaderString = new String(fromHeader, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                fromHeaderString = new String(fromHeader, Charset.defaultCharset());
+            }
+
+            sender = retrieveSender(fromHeaderString);
+            body = Arrays.copyOfRange(message, headerEndIndex + 1, message.length);
+
+        } else {
+            //throw new IllegalArgumentException("Malformed message");
+        }
+
         String destination = msg.getTopicName().replace("/", ".");
-        final Message<?> externalMsg = MessageBuilder.withPayload(msg.getPayload().toString(Charset.forName("UTF8"))).setHeader(GcpPubSubHeaders.TOPIC, destination).setHeader("KIWICONNECT_FROM", destination).setHeader("serial", msg.getUsername()).build();
+        final Message<?> externalMsg = MessageBuilder.withPayload(new String(body)).setHeader(GcpPubSubHeaders.TOPIC, destination).setHeader("KIWICONNECT_FROM", destination).setHeader("serial", msg.getUsername()).build();
         kiwiConnectOutputChannel.send(externalMsg);
+    }
+
+    public static final String FROM_HEADER_PREFIX = "FROM: ";
+
+    private String retrieveSender(String fromHeaderString) {
+        if (fromHeaderString.startsWith(FROM_HEADER_PREFIX)) {
+            return fromHeaderString.substring(FROM_HEADER_PREFIX.length()).trim();
+        } else {
+            throw new IllegalArgumentException("invalid from header");
+        }
     }
 
     private void handleEmLog(InterceptPublishMessage msg) {
@@ -102,9 +144,9 @@ public class SpringIntegrationInterceptor extends AbstractInterceptHandler imple
     private void handleKiwibus(final InterceptPublishMessage msg) {
         final ByteBuf payload = msg.getPayload();
         if (null != payload) {
-            logger.info("Publishing following message in the cloud: {}", payload.toString(Charset.defaultCharset()));
+            logger.debug("Publishing following message in the cloud: {}", payload.toString(Charset.defaultCharset()));
         } else {
-            logger.info("Publishing 'null' message in the cloud.");
+            logger.debug("Publishing 'null' message in the cloud.");
         }
 
         final Message<String> externalMsg = MessageBuilder.withPayload(msg.getPayload().toString(Charset.forName("UTF8"))).setHeader("serial", msg.getUsername()).build();
@@ -121,7 +163,7 @@ public class SpringIntegrationInterceptor extends AbstractInterceptHandler imple
 
     @Override
     public void handleMessage(Message<?> message) throws MessagingException {
-        logger.info("Message arrived! Payload: " + message.getPayload());
+        logger.debug("Message arrived! Payload: " + message.getPayload());
         Object kiwiconnectDestination = message.getHeaders().get("KIWICONNECT_TO");
 
         MqttQoS qos = MqttQoS.valueOf(1);

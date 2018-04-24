@@ -79,7 +79,7 @@ class DefaultMoquetteSslContextCreator implements ISslContextCreator {
             LOG.info("Loading keystore. KeystorePath = {}.", jksPath);
             InputStream jksInputStream = jksDatastore(jksPath);
             SSLContext serverContext = SSLContext.getInstance("TLS");
-            final KeyStore ks = KeyStore.getInstance("JKS");
+            final KeyStore ks = KeyStore.getInstance("PKCS12");
             ks.load(jksInputStream, keyStorePassword.toCharArray());
             LOG.info("Initializing key manager...");
             final KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());

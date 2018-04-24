@@ -1,6 +1,8 @@
 package io.moquette.integration.pubsub;
 
 import javax.annotation.PreDestroy;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -30,12 +32,18 @@ public class PubSubConfiguration {
     private GooglePubsubProperties googlePubsubProperties;
 
     public PubSubConfiguration(PubSubAdmin pubSubAdmin,
-                               GooglePubsubProperties googlePubsubProperties,
-                               @Value("${spring.application.name:dummy}") String applicationName) {
+                               GooglePubsubProperties googlePubsubProperties) {
+
+        String hostName = "localhost";
+        try {
+            hostName = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+
+        }
         this.pubSubAdmin = pubSubAdmin;
         this.googlePubsubProperties = googlePubsubProperties;
-        subName = String.format("%s-%s", applicationName, UUID.randomUUID());
-        kiwiConnectSubName = String.format("%s-%s", applicationName, UUID.randomUUID());
+        subName = String.format("%s-%s", hostName, UUID.randomUUID());
+        kiwiConnectSubName = String.format("%s-%s", hostName, UUID.randomUUID());
     }
 
     private String subName;
